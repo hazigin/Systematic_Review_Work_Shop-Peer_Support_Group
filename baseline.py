@@ -11,8 +11,7 @@ def feature_create(train,test):
     df_temp = pd.concat([df_train,df_test])
     del df_train,df_test
     
-    
-    
+        
     df_train = df_temp[df_temp["evel_set"]==0]
     df_test = df_temp[df_temp["evel_set"]==1]
     df_train.drop("evel_set",axis=1,inplace=True)
