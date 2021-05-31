@@ -1,5 +1,8 @@
 #複数CSVを1つのDFに結合
 import os
+import pandas as pd
+import numpy as np
+
 path = "/home/nishika_apartment_2021_spring/train"
 files = os.listdir(path)
 files_file = [f for f in files if os.path.isfile(os.path.join(path, f))]
