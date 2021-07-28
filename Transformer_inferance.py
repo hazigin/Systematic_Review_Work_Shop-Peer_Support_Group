@@ -9,6 +9,7 @@ import json
 import os
 import gc
 import sys
+import datetime
 import numpy as np
 import pandas as pd
 
@@ -46,6 +47,8 @@ id_col = config["ID_name"]
 target_col = config["target_col"]
 text_col = 'excerpt'
 
+VERSION = config["exp_version"]
+# modelの設定
 batch_size = config["CFG"]["batch_size"]
 epochs = config["CFG"]["n_epoch"]
 seed = config["CFG"]["seed"]
@@ -56,6 +59,10 @@ max_token_length = config["CFG"]["max_token_length"]
 tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
 # Save the tokenizer so that you can download the files and move it to a Kaggle dataset.
 #tokenizer.save_pretrained(save_dir)
+
+create_logger(VERSION,current_path)
+get_logger(VERSION).info(os.getcwd())
+get_logger(VERSION).info("Transformer_inferance.py START:{0:%Y%m%d%H%M%S}.csv".format(datetime.datetime.now()))
 
 df_test = pd.read_csv(testdatapath)
 test_encodings = tokenizer(list(df_test.excerpt.values), truncation=True, padding='max_length', max_length=max_token_length)
@@ -121,5 +128,4 @@ sub = pd.read_csv(sampledatapath, index_col=id_col)
 sub[target_col] = p_tst
 sub.to_csv(submitpath)
 
-
-
+get_logger(VERSION).info("Transformer_inferance.py END:{0:%Y%m%d%H%M%S}.csv".format(datetime.datetime.now()))

@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import json
 import sys
+import datetime
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
 
@@ -43,6 +44,8 @@ sampledatapath=Path(inputdatapath,"sample_submission.csv")
 submitpath=Path(outputdatapath,"submission.csv")
 weightdatapath = Path(current_path,'weight')
 
+VERSION = config["exp_version"]
+# modelの設定
 batch_size = config["CFG"]["batch_size"]
 epochs = config["CFG"]["n_epoch"]
 seed = config["CFG"]["seed"]
@@ -55,6 +58,10 @@ reduce_lr_plateau = config["CFG"]["reduce_lr_plateau"]
 tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
 # Save the tokenizer so that you can download the files and move it to a Kaggle dataset.
 #tokenizer.save_pretrained(save_dir)
+
+create_logger(VERSION,current_path)
+get_logger(VERSION).info(os.getcwd())
+get_logger(VERSION).info("Transformer.py START:{0:%Y%m%d%H%M%S}.csv".format(datetime.datetime.now()))
 
 # dataの準備
 df_train = pd.read_csv(traindatapaht)
@@ -159,3 +166,5 @@ loss, rmse = model.evaluate(validloader)
 
 # 7. Save model
 model.save_weights(Path(weightdatapath,"weight-{epoch:04d}.ckpt".format(epoch=epoch)))
+
+get_logger(VERSION).info("Transformer.py END:{0:%Y%m%d%H%M%S}.csv".format(datetime.datetime.now()))

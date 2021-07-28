@@ -1,18 +1,15 @@
 {
     "CFG": {
-        "height": 512,
-        "width": 512,
-        "channel":3,
         "batch_size":  8,
         "metric": "mae",
         "seed": 46,
         "debug": "0.8",
-        "n_epoch": 10,
+        "n_epoch": 50,
         "lr": 5e-5,
         "weight_decay": "1e-06",
         "n_splits": 5,
         "label_num": 13,
-        "epoch":22,
+        "epoch":1,
         "max_token_length":256,
         "earlys_patience":10,
         "reduce_lr_plateau":5
