@@ -22,7 +22,7 @@ from transformers import TFDistilBertModel
 from kaggle_secrets import UserSecretsClient
 
 if "debugpy" in sys.modules:
-    current_path = '/home/commonLit_readability_prize/'
+    current_path = '/home/Systematic_Review_Work_Shop-Peer_Support_Group'
 else:
     current_path = '.'
 
@@ -65,11 +65,11 @@ get_logger(VERSION).info("Transformer.py START:{0:%Y%m%d%H%M%S}.csv".format(date
 
 # dataの準備
 df_train = pd.read_csv(traindatapaht)
-X_train, X_val, y_train, y_val = train_test_split(df_train.excerpt.values, df_train.target.values,
+X_train, X_val, y_train, y_val = train_test_split(df_train.abstract.values, df_train.judgement.values,
                                                  test_size=0.2, random_state=seed)
 
-train_encodings = tokenizer(list(X_train), truncation=True, padding=True, max_length=max_token_length)
-val_encodings = tokenizer(list(X_val), truncation=True, padding=True, max_length=max_token_length)
+train_encodings = tokenizer(list(X_train.astype('str')), truncation=True, padding=True, max_length=max_token_length)
+val_encodings = tokenizer(list(X_val.astype('str')), truncation=True, padding=True, max_length=max_token_length)
 
 AUTOTUNE = tf.data.AUTOTUNE
 
@@ -124,7 +124,7 @@ def CommonLitModel():
     clf_output = Dropout(0.1)(clf_output)
     
     # Output layer with linear activation as we are doing regression. 
-    out = Dense(1, activation='linear')(clf_output)
+    out = Dense(1, activation='sigmoid')(clf_output)
     
     # Build model 
     model = Model(inputs=[input_ids, attention_mask], outputs=out)

@@ -39,7 +39,7 @@ inputdatapath = Path(datapath,'input')
 outputdatapath = Path(datapath,'output')
 traindatapaht=Path(inputdatapath,"train.csv")
 testdatapath=Path(inputdatapath,"test.csv")
-sampledatapath=Path(inputdatapath,"sample_submission.csv")
+sampledatapath=Path(inputdatapath,"sample_submit.csv")
 submitpath=Path(outputdatapath,"submission.csv")
 weightdatapath = Path(current_path,'weight')
 
@@ -65,7 +65,7 @@ get_logger(VERSION).info(os.getcwd())
 get_logger(VERSION).info("Transformer_inferance.py START:{0:%Y%m%d%H%M%S}.csv".format(datetime.datetime.now()))
 
 df_test = pd.read_csv(testdatapath)
-test_encodings = tokenizer(list(df_test.excerpt.values), truncation=True, padding='max_length', max_length=max_token_length)
+test_encodings = tokenizer(list(df_test.abstract.values.astype('str')), truncation=True, padding='max_length', max_length=max_token_length)
 
 # You can use a Transformer model of your choice.
 transformer_model = TFDistilBertModel.from_pretrained('distilbert-base-uncased')
@@ -107,7 +107,7 @@ def CommonLitModel():
     clf_output = Dropout(0.1)(clf_output)
     
     # Output layer with linear activation as we are doing regression. 
-    out = Dense(1, activation='linear')(clf_output)
+    out = Dense(1, activation='sigmoid')(clf_output)
     
     # Build model 
     model = Model(inputs=[input_ids, attention_mask], outputs=out)
@@ -124,8 +124,12 @@ testloader = get_testdataloaders(test_encodings)
 
 p_tst = model.predict(testloader)
 
-sub = pd.read_csv(sampledatapath, index_col=id_col)
-sub[target_col] = p_tst
-sub.to_csv(submitpath)
+
+#submission1['toxic'] = submission1['toxic']*0.9 + submission2['toxic']*0.1
+
+sub = pd.read_csv(sampledatapath,header=None)
+pre = np.round(p_tst).astype(np.int)
+sub[1] = pre
+sub.to_csv(submitpath,header=False,index=False)
 
 get_logger(VERSION).info("Transformer_inferance.py END:{0:%Y%m%d%H%M%S}.csv".format(datetime.datetime.now()))

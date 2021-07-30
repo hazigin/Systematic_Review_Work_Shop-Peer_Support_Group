@@ -10,7 +10,7 @@
         "n_splits": 5,
         "label_num": 13,
         "epoch":1,
-        "max_token_length":256,
+        "max_token_length":512,
         "earlys_patience":10,
         "reduce_lr_plateau":5
     },
