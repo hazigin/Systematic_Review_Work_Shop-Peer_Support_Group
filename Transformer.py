@@ -7,6 +7,7 @@ from pathlib import Path
 import argparse
 import os
 import gc
+import shutil
 import numpy as np
 import pandas as pd
 import json
@@ -14,12 +15,12 @@ import sys
 import datetime
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
-
+from tensorflow.keras.callbacks import TensorBoard
 # HuggingFace related
 from transformers import DistilBertTokenizerFast
 from transformers import TFDistilBertModel
-
 from kaggle_secrets import UserSecretsClient
+from transformers import RobertaConfig, TFRobertaModel,RobertaTokenizer,RobertaTokenizerFast
 
 if "debugpy" in sys.modules:
     current_path = '/home/Systematic_Review_Work_Shop-Peer_Support_Group'
@@ -28,6 +29,10 @@ else:
 
 sys.path.append(os.path.join(current_path,"logs"))
 from base_log import create_logger, get_logger
+
+#Tensorboad Clear
+shutil.rmtree(os.path.join(current_path,"board"))
+os.mkdir(os.path.join(current_path,"board"))
 
 jsonpath = os.path.join(current_path,"configs/default.json")
 parser = argparse.ArgumentParser()
@@ -43,6 +48,7 @@ testdatapath=Path(inputdatapath,"test.csv")
 sampledatapath=Path(inputdatapath,"sample_submission.csv")
 submitpath=Path(outputdatapath,"submission.csv")
 weightdatapath = Path(current_path,'weight')
+boardpath = Path(current_path,'board')
 
 VERSION = config["exp_version"]
 # modelの設定
@@ -56,6 +62,7 @@ reduce_lr_plateau = config["CFG"]["reduce_lr_plateau"]
 
 # Use the tokenizer of your choice
 tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
+#tokenizer = RobertaTokenizerFast.from_pretrained("roberta-base")
 # Save the tokenizer so that you can download the files and move it to a Kaggle dataset.
 #tokenizer.save_pretrained(save_dir)
 
@@ -110,6 +117,7 @@ trainloader, validloader = get_dataloaders(train_encodings, y_train, val_encodin
 
 # You can use a Transformer model of your choice.
 transformer_model = TFDistilBertModel.from_pretrained('distilbert-base-uncased')
+#transformer_model = TFRobertaModel.from_pretrained('roberta-base')
 
 def CommonLitModel():
     # Input layers
@@ -145,13 +153,15 @@ earlystopper = tf.keras.callbacks.EarlyStopping(
 reducelrplateau = tf.keras.callbacks.ReduceLROnPlateau(
     monitor='val_loss', factor=0.2, patience=reduce_lr_plateau
 )
-   
+
+
+tensorborad = TensorBoard(log_dir=os.path.join(current_path,"board"))
 # 4. Initialize model
 tf.keras.backend.clear_session()
 model = CommonLitModel()
 
 # Compile
-optimizer = tf.keras.optimizers.Adam(lr=1e-5)
+optimizer = tf.keras.optimizers.Adam(lr=1e-4)
 model.compile(optimizer, loss='mean_squared_error', metrics=[tf.keras.metrics.RootMeanSquaredError()])    
 
 # 5. Train the model
@@ -159,7 +169,7 @@ _ = model.fit(trainloader,
             epochs=epochs, 
             validation_data=validloader,
             callbacks=[reducelrplateau,
-                        earlystopper])
+                        earlystopper,tensorborad])
 
 # 6. Evaluate on validation dataset.
 loss, rmse = model.evaluate(validloader)

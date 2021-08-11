@@ -19,6 +19,7 @@ from sklearn.model_selection import StratifiedKFold
 from transformers import DistilBertTokenizerFast
 from transformers import TFDistilBertModel
 from kaggle_secrets import UserSecretsClient
+from transformers import RobertaConfig, TFRobertaModel,RobertaTokenizer,RobertaTokenizerFast
 
 if "debugpy" in sys.modules:
     current_path = '/home/commonLit_readability_prize/'
@@ -57,6 +58,7 @@ max_token_length = config["CFG"]["max_token_length"]
 
 # Use the tokenizer of your choice
 tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
+#tokenizer = RobertaTokenizerFast.from_pretrained("roberta-base")
 # Save the tokenizer so that you can download the files and move it to a Kaggle dataset.
 #tokenizer.save_pretrained(save_dir)
 
@@ -69,6 +71,7 @@ test_encodings = tokenizer(list(df_test.abstract.values.astype('str')), truncati
 
 # You can use a Transformer model of your choice.
 transformer_model = TFDistilBertModel.from_pretrained('distilbert-base-uncased')
+#transformer_model = TFRobertaModel.from_pretrained('roberta-base')
 
 AUTOTUNE = tf.data.AUTOTUNE
 
